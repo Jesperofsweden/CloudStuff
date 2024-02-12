@@ -1,33 +1,46 @@
 #!/bin/sh
 
-# Update and install wget, curl, and Python3
+# Update system and install necessary packages
 apk update && apk add --no-cache wget curl python3 py3-pip
 
-# Ensure pip is up to date
-#pip install --upgrade pip
+# Function to create a virtual environment and activate it
+create_and_use_venv() {
+  local venv_name="/opt/venv_$1"
+  echo "Creating virtual environment for $1 in $venv_name"
+  python3 -m venv $venv_name
+  . $venv_name/bin/activate
+}
 
 # Function to install kubectl
 install_kubectl() {
+  echo "Installing kubectl..."
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
   chmod +x kubectl
-  mv kubectl /usr/local/bin/
+  mv kubectl /usr/local/bin/kubectl
 }
 
-# Install AWS CLI using pip
-install_aws_cli() {
-  pip install awscli
-}
-
-# Placeholder for Azure CLI installation method
+# Function to install Azure CLI
 install_az_cli() {
-  echo "Azure CLI installation method needs to be adapted for Alpine Linux."
-  # Consider using a Docker container or a virtual environment for installation.
+  echo "Installing Azure CLI..."
+  create_and_use_venv azure-cli
+  pip install azure-cli
+  deactivate
 }
 
-# Placeholder for Google Cloud SDK installation method
+# Function to install AWS CLI
+install_aws_cli() {
+  echo "Installing AWS CLI..."
+  create_and_use_venv aws-cli
+  pip install awscli
+  deactivate
+}
+
+# Function to install Google Cloud CLI
 install_gcloud_cli() {
-  echo "Google Cloud SDK installation method needs to be adapted for Alpine Linux."
-  # Consider downloading and installing manually if not available through apk.
+  echo "Installing Google Cloud CLI..."
+  create_and_use_venv gcloud-cli
+  curl https://sdk.cloud.google.com | bash
+  deactivate
 }
 
 # Detect cloud provider by querying the metadata service
@@ -67,3 +80,5 @@ case $CLOUD_PROVIDER in
     echo "Could not detect cloud environment or not running in a supported cloud environment."
     ;;
 esac
+
+echo "Installation complete."
