@@ -1,52 +1,50 @@
 #!/bin/sh
 
-# Function to install dependencies based on environment
-install_dependencies() {
-    echo "Installing dependencies..."
-    if [ "$ENVIRONMENT" = "AWS" ]; then
-        apk add --no-cache curl python3 py3-pip
-        pip install awscli
-    elif [ "$ENVIRONMENT" = "Azure" ]; then
-        apk add --no-cache curl python3 py3-pip
-        pip install azure-cli
-    elif [ "$ENVIRONMENT" = "GCP" ]; then
-        apk add --no-cache curl
-        curl -sSL https://sdk.cloud.google.com | bash
-        source $HOME/google-cloud-sdk/path.bash.inc
-        gcloud components install kubectl
-    else
-        echo "Unknown environment!"
-        exit 1
-    fi
+# Update and install wget and curl
+apk update && apk add --no-cache wget curl
+
+# Function to install kubectl
+install_kubectl() {
+  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  chmod +x kubectl
+  mv kubectl /usr/local/bin/
 }
 
-# Check if curl is installed, if not, install it using wget
-if ! command -v curl >/dev/null 2>&1; then
-    echo "Curl not found, installing..."
-    apk add --no-cache wget
-    wget https://curl.se/download/curl-7.82.0.tar.gz
-    tar -xvf curl-7.82.0.tar.gz
-    cd curl-7.82.0
-    ./configure
-    make
-    make install
-    cd ..
-    rm -rf curl-7.82.0.tar.gz curl-7.82.0
-fi
+# Function to install Azure CLI
+install_az_cli() {
+  apk update && apk add --no-cache python3 py3-pip
+  pip install azure-cli
+}
 
-# Detect environment
-if command -v kubectl >/dev/null 2>&1; then
-    ENVIRONMENT="GCP"
-elif command -v aws >/dev/null 2>&1; then
-    ENVIRONMENT="AWS"
-elif command -v az >/dev/null 2>&1; then
-    ENVIRONMENT="Azure"
-else
-    echo "Environment not detected!"
-    exit 1
-fi
+# Function to install AWS CLI
+install_aws_cli() {
+  apk update && apk add --no-cache python3 py3-pip
+  pip install awscli
+}
 
-# Install dependencies based on environment
-install_dependencies
+# Function to install Google Cloud CLI
+install_gcloud_cli() {
+  apk add --no-cache curl
+  curl https://sdk.cloud.google.com | bash
+  exec -l $SHELL
+}
 
-echo "Setup completed for $ENVIRONMENT environment."
+# Detect environment and install appropriate CLI tools
+detect_environment_and_install_cli() {
+  # Pseudocode: Replace this with your logic to detect the cloud environment
+  if [ "ENVIRONMENT" = "AWS" ]; then
+    install_aws_cli
+  elif [ "ENVIRONMENT" = "Azure" ]; then
+    install_az_cli
+  elif [ "ENVIRONMENT" = "GCP" ]; then
+    install_gcloud_cli
+  else
+    echo "Could not detect cloud environment or not running in a supported cloud environment."
+  fi
+}
+
+# Install kubectl
+install_kubectl
+
+# Detect the environment and install the appropriate CLI
+detect_environment_and_install_cli
