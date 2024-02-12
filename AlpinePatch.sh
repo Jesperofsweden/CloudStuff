@@ -4,7 +4,7 @@
 apk update && apk add --no-cache wget curl python3 py3-pip
 
 # Ensure pip is up to date
-pip install --upgrade pip
+#pip install --upgrade pip
 
 # Function to install kubectl
 install_kubectl() {
