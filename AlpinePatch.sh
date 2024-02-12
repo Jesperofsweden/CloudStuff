@@ -1,7 +1,10 @@
 #!/bin/sh
 
-# Update and install wget and curl
-apk update && apk add --no-cache wget curl
+# Update and install wget, curl, and Python3
+apk update && apk add --no-cache wget curl python3 py3-pip
+
+# Ensure pip is up to date
+pip install --upgrade pip
 
 # Function to install kubectl
 install_kubectl() {
@@ -10,21 +13,21 @@ install_kubectl() {
   mv kubectl /usr/local/bin/
 }
 
-# Function to install Azure CLI
-install_az_cli() {
-  apk update --no-cache python3 py3-pip
-  pip install --user azure-cli
-}
-
-# Function to install AWS CLI
+# Install AWS CLI using pip
 install_aws_cli() {
-  apk update && --no-cache aws-cli || pip install --user awscli
+  pip install awscli
 }
 
-# Function to install Google Cloud CLI
+# Placeholder for Azure CLI installation method
+install_az_cli() {
+  echo "Azure CLI installation method needs to be adapted for Alpine Linux."
+  # Consider using a Docker container or a virtual environment for installation.
+}
+
+# Placeholder for Google Cloud SDK installation method
 install_gcloud_cli() {
-  apk add --no-cache curl
-  curl -sSL https://sdk.cloud.google.com | bash
+  echo "Google Cloud SDK installation method needs to be adapted for Alpine Linux."
+  # Consider downloading and installing manually if not available through apk.
 }
 
 # Detect cloud provider by querying the metadata service
