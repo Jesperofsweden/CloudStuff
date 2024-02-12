@@ -29,22 +29,40 @@ install_gcloud_cli() {
   exec -l $SHELL
 }
 
-# Detect environment and install appropriate CLI tools
-detect_environment_and_install_cli() {
-  # Pseudocode: Replace this with your logic to detect the cloud environment
-  if [ "ENVIRONMENT" = "AWS" ]; then
-    install_aws_cli
-  elif [ "ENVIRONMENT" = "Azure" ]; then
-    install_az_cli
-  elif [ "ENVIRONMENT" = "GCP" ]; then
-    install_gcloud_cli
+# Detect cloud provider by querying the metadata service
+detect_cloud_provider() {
+  # AWS check
+  if curl -s http://169.254.169.254/latest/dynamic/instance-identity/ 2>&1 | grep -q 'instanceId'; then
+    echo "AWS"
+  # Azure check
+  elif curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-02-01" 2>&1 | grep -q 'compute'; then
+    echo "Azure"
+  # GCP check
+  elif curl -s -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/" 2>&1 | grep -q 'instance'; then
+    echo "GCP"
   else
-    echo "Could not detect cloud environment or not running in a supported cloud environment."
+    echo "Unknown"
   fi
 }
 
 # Install kubectl
 install_kubectl
 
-# Detect the environment and install the appropriate CLI
-detect_environment_and_install_cli
+# Detect the cloud provider and install the appropriate CLI
+CLOUD_PROVIDER=$(detect_cloud_provider)
+echo "Detected cloud provider: $CLOUD_PROVIDER"
+
+case $CLOUD_PROVIDER in
+  AWS)
+    install_aws_cli
+    ;;
+  Azure)
+    install_az_cli
+    ;;
+  GCP)
+    install_gcloud_cli
+    ;;
+  *)
+    echo "Could not detect cloud environment or not running in a supported cloud environment."
+    ;;
+esac
