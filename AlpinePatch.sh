@@ -35,7 +35,7 @@ detect_cloud_provider() {
   if curl -s http://169.254.169.254/latest/dynamic/instance-identity/ 2>&1 | grep -q 'instanceId'; then
     echo "AWS"
   # Azure check
-  elif curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-02-01" 2>&1 | grep -q 'compute'; then
+  elif curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-04-02" 2>&1 | grep -q 'compute'; then
     echo "Azure"
   # GCP check
   elif curl -s -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/" 2>&1 | grep -q 'instance'; then
