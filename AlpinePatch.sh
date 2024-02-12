@@ -13,20 +13,18 @@ install_kubectl() {
 # Function to install Azure CLI
 install_az_cli() {
   apk update && apk add --no-cache python3 py3-pip
-  pip install azure-cli
+  pip install --user azure-cli
 }
 
 # Function to install AWS CLI
 install_aws_cli() {
-  apk update && apk add --no-cache python3 py3-pip
-  pip install awscli
+  apk update && apk add --no-cache aws-cli || pip install --user awscli
 }
 
 # Function to install Google Cloud CLI
 install_gcloud_cli() {
   apk add --no-cache curl
-  curl https://sdk.cloud.google.com | bash
-  exec -l $SHELL
+  curl -sSL https://sdk.cloud.google.com | bash
 }
 
 # Detect cloud provider by querying the metadata service
