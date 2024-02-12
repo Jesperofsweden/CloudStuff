@@ -12,13 +12,13 @@ install_kubectl() {
 
 # Function to install Azure CLI
 install_az_cli() {
-  apk update && apk add --no-cache python3 py3-pip
+  apk update --no-cache python3 py3-pip
   pip install --user azure-cli
 }
 
 # Function to install AWS CLI
 install_aws_cli() {
-  apk update && apk add --no-cache aws-cli || pip install --user awscli
+  apk update && --no-cache aws-cli || pip install --user awscli
 }
 
 # Function to install Google Cloud CLI
